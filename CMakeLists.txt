@@ -42,17 +42,17 @@ file(GLOB_RECURSE BEAST_FILES
 source_group(TREE ${Boost_INCLUDE_DIRS}/boost/beast PREFIX beast FILES ${BEAST_FILES})
 
 file(GLOB APP_FILES
-  beast.hpp
-  http_session.cpp
-  http_session.hpp
-  listener.cpp
-  listener.hpp
+  include/beast.h
+  src/http_session.cpp
+  include/http_session.h
+  src/listener.cpp
+  include/listener.h
   main.cpp
-  net.hpp
-  shared_state.cpp
-  shared_state.hpp
-  websocket_session.cpp
-  websocket_session.hpp
+  include/net.h
+  src/shared_state.cpp
+  include/shared_state.h
+  src/websocket_session.cpp
+  include/websocket_session.h
   chat_client.html
   README.md)
 

@@ -10,9 +10,9 @@
 #ifndef CPPCON2018_WEBSOCKET_SESSION_HPP
 #define CPPCON2018_WEBSOCKET_SESSION_HPP
 
-#include "net.hpp"
-#include "beast.hpp"
-#include "shared_state.hpp"
+#include "net.h"
+#include "beast.h"
+#include "shared_state.h"
 
 #include <cstdlib>
 #include <memory>
@@ -24,8 +24,7 @@ class shared_state;
 
 /** Represents an active WebSocket connection to the server
 */
-class websocket_session : public std::enable_shared_from_this<websocket_session>
-{
+class websocket_session : public std::enable_shared_from_this<websocket_session> {
     beast::flat_buffer buffer_;
     websocket::stream<tcp::socket> ws_;
     std::shared_ptr<shared_state> state_;
@@ -37,9 +36,7 @@ class websocket_session : public std::enable_shared_from_this<websocket_session>
     void on_write(error_code ec, std::size_t bytes_transferred);
 
 public:
-    websocket_session(
-        tcp::socket socket,
-        std::shared_ptr<shared_state> const& state);
+    websocket_session(tcp::socket socket, std::shared_ptr<shared_state> const& state);
 
     ~websocket_session();
 
@@ -55,15 +52,9 @@ public:
 template<class Body, class Allocator>
 void
 websocket_session::
-run(http::request<Body, http::basic_fields<Allocator>> req)
-{
+run(http::request<Body, http::basic_fields<Allocator>> req) {
     // Accept the websocket handshake
-    ws_.async_accept(
-        req,
-        std::bind(
-            &websocket_session::on_accept,
-            shared_from_this(),
-            std::placeholders::_1));
+    ws_.async_accept(req, std::bind(&websocket_session::on_accept, shared_from_this(), std::placeholders::_1));
 }
 
 #endif

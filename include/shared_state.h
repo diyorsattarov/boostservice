@@ -28,12 +28,9 @@ class shared_state
     std::unordered_set<websocket_session*> sessions_;
 
 public:
-    explicit
-    shared_state(std::string doc_root);
+    explicit shared_state(std::string doc_root);
 
-    std::string const&
-    doc_root() const noexcept
-    {
+    std::string const& doc_root() const noexcept {
         return doc_root_;
     }
 

@@ -7,28 +7,16 @@
 // Official repository: https://github.com/vinniefalco/CppCon2018
 //
 
-#include "websocket_session.hpp"
+#include "../include/websocket_session.h"
 
-websocket_session::
-websocket_session(
-    tcp::socket socket,
-    std::shared_ptr<shared_state> const& state)
-    : ws_(std::move(socket))
-    , state_(state)
-{
-}
+websocket_session::websocket_session(tcp::socket socket, std::shared_ptr<shared_state> const& state) : ws_(std::move(socket)), state_(state) {}
 
-websocket_session::
-~websocket_session()
-{
+websocket_session::~websocket_session() {
     // Remove this session from the list of active sessions
     state_->leave(*this);
 }
 
-void
-websocket_session::
-fail(error_code ec, char const* what)
-{
+void websocket_session::fail(error_code ec, char const* what) {
     // Don't report these
     if( ec == net::error::operation_aborted ||
         ec == websocket::error::closed)
@@ -37,10 +25,7 @@ fail(error_code ec, char const* what)
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-void
-websocket_session::
-on_accept(error_code ec)
-{
+void websocket_session::on_accept(error_code ec) {
     // Handle the error, if any
     if(ec)
         return fail(ec, "accept");
@@ -49,19 +34,10 @@ on_accept(error_code ec)
     state_->join(*this);
 
     // Read a message
-    ws_.async_read(
-        buffer_,
-        [sp = shared_from_this()](
-            error_code ec, std::size_t bytes)
-        {
-            sp->on_read(ec, bytes);
-        });
+    ws_.async_read(buffer_, [sp = shared_from_this()](error_code ec, std::size_t bytes) { sp->on_read(ec, bytes); });
 }
 
-void
-websocket_session::
-on_read(error_code ec, std::size_t)
-{
+void websocket_session::on_read(error_code ec, std::size_t) {
     // Handle the error, if any
     if(ec)
         return fail(ec, "read");
@@ -73,19 +49,10 @@ on_read(error_code ec, std::size_t)
     buffer_.consume(buffer_.size());
 
     // Read another message
-    ws_.async_read(
-        buffer_,
-        [sp = shared_from_this()](
-            error_code ec, std::size_t bytes)
-        {
-            sp->on_read(ec, bytes);
-        });
+    ws_.async_read(buffer_, [sp = shared_from_this()](error_code ec, std::size_t bytes) { sp->on_read(ec, bytes); });
 }
 
-void
-websocket_session::
-send(std::shared_ptr<std::string const> const& ss)
-{
+void websocket_session::send(std::shared_ptr<std::string const> const& ss) {
     // Always add to queue
     queue_.push_back(ss);
 
@@ -94,19 +61,10 @@ send(std::shared_ptr<std::string const> const& ss)
         return;
 
     // We are not currently writing, so send this immediately
-    ws_.async_write(
-        net::buffer(*queue_.front()),
-        [sp = shared_from_this()](
-            error_code ec, std::size_t bytes)
-        {
-            sp->on_write(ec, bytes);
-        });
+    ws_.async_write(net::buffer(*queue_.front()), [sp = shared_from_this()](error_code ec, std::size_t bytes) { sp->on_write(ec, bytes); });
 }
 
-void
-websocket_session::
-on_write(error_code ec, std::size_t)
-{
+void websocket_session::on_write(error_code ec, std::size_t) {
     // Handle the error, if any
     if(ec)
         return fail(ec, "write");
@@ -115,12 +73,5 @@ on_write(error_code ec, std::size_t)
     queue_.erase(queue_.begin());
 
     // Send the next message if any
-    if(! queue_.empty())
-        ws_.async_write(
-            net::buffer(*queue_.front()),
-            [sp = shared_from_this()](
-                error_code ec, std::size_t bytes)
-            {
-                sp->on_write(ec, bytes);
-            });
+    if(! queue_.empty()) ws_.async_write(net::buffer(*queue_.front()), [sp = shared_from_this()](error_code ec, std::size_t bytes) { sp->on_write(ec, bytes); });
 }
